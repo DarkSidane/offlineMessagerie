@@ -6,6 +6,65 @@
 
 // Taille max d'une chaîne de caractères
 #define S_MAX 256
+#include <X11/Xlib.h>
+#define MAX_MESSAGE_LENGTH 256
+typedef struct {
+    Display *display;
+    Window window;
+    GC gc;
+    char messages[MAX_MESSAGE_LENGTH];
+} Messenger;
+
+// Fonction pour afficher les messages dans la fenêtre
+void displayMessages(Messenger *messenger) {
+    XClearWindow(messenger->display, messenger->window);
+    XDrawString(messenger->display, messenger->window, messenger->gc, 10, 20, messenger->messages, strlen(messenger->messages));
+}
+
+// Fonction pour gérer les événements
+void handleEvent(Messenger *messenger, XEvent event) {
+    if (event.type == ButtonPress) {
+        // Le bouton OK est cliqué, ajouter le message à la liste
+        strcat(messenger->messages, "Message envoyé!\n");
+        displayMessages(messenger);
+    }
+}
+int fenetre () {
+    Messenger messenger;
+    XEvent event;
+
+    // Ouvrir une connexion vers le serveur X
+    messenger.display = XOpenDisplay(NULL);
+    if (messenger.display == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir la connexion X\n");
+        return 1;
+    }
+
+    // Créer la fenêtre principale
+    messenger.window = XCreateSimpleWindow(messenger.display, RootWindow(messenger.display, 0), 0, 0, 400, 300, 1,
+                                           BlackPixel(messenger.display, 0), WhitePixel(messenger.display, 0));
+
+    // Créer un contexte graphique
+    messenger.gc = XCreateGC(messenger.display, messenger.window, 0, NULL);
+
+    // Sélectionner les événements à surveiller
+    XSelectInput(messenger.display, messenger.window, ButtonPressMask);
+
+    // Afficher la fenêtre
+    XMapWindow(messenger.display, messenger.window);
+
+    // Boucle principale de gestion des événements
+    while (1) {
+        XNextEvent(messenger.display, &event);
+        handleEvent(&messenger, event);
+    }
+
+    // Fermer la connexion X
+    XCloseDisplay(messenger.display);
+
+    return 0;
+}
+
 char **decoupe_mots(char *buf)
 {
 	// Prend un mot en argument et renvoie les mots contenus dedans
@@ -46,7 +105,10 @@ int interp_commande(char *commande)
 			break;
 		case 'p':
 			if (enregistre == TRUE)
+			{
 				printf("Ouverture de la fenêtre de dialogue\n");
+				fenetre();
+			}
 			else
 				printf("Vous n'êtes pas enregistré ! \n");
 			break;

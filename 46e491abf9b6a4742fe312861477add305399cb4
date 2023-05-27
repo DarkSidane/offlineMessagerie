@@ -1,0 +1,92 @@
+[33mcommit c63fdf32d00af082771d11db4ab124a072466180[m[33m ([m[1;36mHEAD -> [m[1;32msidane[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 12:10:01 2023 +0100
+
+    added gitignore
+
+[33mcommit 3891f284377e5b70d12621216c9d6f7d0c1e757c[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:05:10 2023 +0100
+
+    Delete main
+
+[33mcommit 91777439229f08d1ec76f16dcfddb906dd8c1eff[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:05:01 2023 +0100
+
+    Delete prog
+
+[33mcommit 6a10aec38a2fe4bdf801652bb0347250bb1bc049[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:04:49 2023 +0100
+
+    Delete latex directory
+
+[33mcommit cbd988a177578a8179ea480a071d0f5738ccdaf7[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:04:37 2023 +0100
+
+    Delete énoncé.pdf
+
+[33mcommit eb08cf4a8b382c58076513cadf826b8da693f335[m[33m ([m[1;32mnmain[m[33m)[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:03:19 2023 +0100
+
+    Delete énoncé.pdf:Zone.Identifier
+
+[33mcommit 26174658396e180945757082d4169f0352208021[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:03:10 2023 +0100
+
+    Delete énoncé.pdfZone.Identifier
+
+[33mcommit 46e491abf9b6a4742fe312861477add305399cb4[m
+Author: DarkSidane <sidanealp0@gmail.com>
+Date:   Sat May 27 11:47:13 2023 +0200
+
+    Interprétation des commandes terminé
+
+[33mcommit f71c0af0348d71657a88e8731c1de2d11aaa8bcf[m
+Author: Amine Boujemaaoui <92468393+amine-boujemaaoui@users.noreply.github.com>
+Date:   Sat May 27 11:12:52 2023 +0100
+
+    fait le separateur de commande
+
+[33mcommit 3c114c5ad27a32ee4d039c597eaeca41b3dbc994[m
+Author: DarkSidane <sidanealp0@gmail.com>
+Date:   Sat May 27 10:36:15 2023 +0200
+
+    Suppression des fichiers inutiles
+
+[33mcommit 3b5fbcd9ac3fc06c5c5680fc47ab0ef6bbdb7d2d[m
+Author: DarkSidane <sidanealp0@gmail.com>
+Date:   Sat May 27 10:25:09 2023 +0200
+
+    Ajout du template Latex du devoir dans le dossier latex + ajout de l'énoncé en pdf à la racine
+
+[33mcommit 4c28eb1c2112e929b80dca691d00f41acfe4c822[m
+Author: DarkSidane <sidanealp0@gmail.com>
+Date:   Sat May 27 10:00:56 2023 +0200
+
+    Ajout de la fonction interp_commande
+
+[33mcommit 93619086272f5a2b4a2f4b0bd800ad7a5ccc1147[m
+Merge: 00e1af2 b490068
+Author: DarkSidane <sidanealp0@gmail.com>
+Date:   Fri May 26 10:41:13 2023 +0200
+
+    Merge branch 'main' of https://github.com/DarkSidane/offlineMessagerie
+    
+    Initialisation du projet
+
+[33mcommit 00e1af232d085deed5343eff887cd2672aafa71a[m
+Author: DarkSidane <sidanealp0@gmail.com>
+Date:   Fri May 26 10:28:11 2023 +0200
+
+    Initialisation de la branche master, ouverture de la fenêtre de dialogue avec l'utilisateur
+
+[33mcommit b490068fba91350858f8a271aca29623517440b4[m
+Author: DarkSidane <61388499+DarkSidane@users.noreply.github.com>
+Date:   Fri May 26 10:22:46 2023 +0200
+
+    Initial commit
