@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
+//#include "fenetre.c"
 #define TRUE 1
 #define FALSE 0
 #define S_MAX 256 // Taille max d'une chaîne de caractères
@@ -38,7 +38,7 @@ int parler(char *nom)
 	else if (pid1 == 0)
 	{
 		// Child process 1
-		execlp("xterm", "xterm", NULL);
+		execlp("./build/fenetre", "fenetre", NULL);
 		fprintf(stderr, "Failed to launch xterm for process 1\n");
 		return 1;
 	}
@@ -54,7 +54,7 @@ int parler(char *nom)
 	else if (pid2 == 0)
 	{
 		// Child process 2
-		execlp("xterm", "xterm", NULL);
+		execlp("./build/fenetre", "fenetre", NULL);
 		fprintf(stderr, "Failed to launch xterm for process 2\n");
 		return 1;
 	}
@@ -108,6 +108,13 @@ int interp_commande(char *commande)
 }
 int main(int argc, char **argv)
 {
+	int buildStatus = system("gcc fenetre.c -o build/fenetre -lX11");
+
+	if (buildStatus == 0) {
+		printf("Build successful.\n");
+	} else {
+		printf("Build failed.\n");
+	}
 	int running = TRUE;
 	char buf[S_MAX];
 
