@@ -6,7 +6,7 @@
 
 //Taille max d'une chaîne de caractères
 #define S_MAX 256
-int interp_commande(char * commande)
+int interp_commande(char *commande)
 {
 	/*Interprète les commandes et exécute la fonction appropriée.
 	 * Renvoie 1 si la commande est différente de q, 0 sinon. 
@@ -44,17 +44,45 @@ int main(int argc, char **argv)
 	int running = TRUE;
 	int cmd = -1; // Cette variable sert à stocker commande rentré l'indice vaut 0 si l'utilsateur rentre e, 1 si p, q si 2, 3 sinon) 
 	char buf[S_MAX];
-	while (running == TRUE)
-	{
+	char** com;
+
+	com = malloc(2 * S_MAX * sizeof(char));
+	/*
+	while (running == TRUE) {
 		// Boucle d'execution de notre programme
 		char *commande;
 		printf("Entrez une commande (e, p, q) \n");
 		fgets(buf, S_MAX, stdin);
 		cmd = interp_commande(buf);
-		if (cmd == 1) 
-			running = FALSE	;
+		if (cmd == 1)
+			running = FALSE	; */
 
+	char *line = NULL;
+	size_t linecap = 0;
+	size_t linelen;
+
+	// while ((linelen = getline(&line, &linecap, stdin)) > 0) {
+	while (linelen = fgets(buf, S_MAX, stdin) != NULL) {
+			buf[strcspn(buf, "\n")] = 0;
+			break;
 	}
+
+	char delim[] = " ";
+	char *ptr = strtok(buf, delim);
+
+	int i = 0;
+	while (ptr != NULL) {
+		com[i] = ptr;
+		i++;
+		ptr = strtok(NULL, delim);
+	}
+
+	for (size_t i = 0; i < 2; i++) {
+		printf("%s - ", com[i]);
+	}
+
+	interp_commande("e sidane");
+
 	return EXIT_SUCCESS;
 }
 
