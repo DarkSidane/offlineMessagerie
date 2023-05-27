@@ -1,55 +1,60 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #define TRUE 1
 #define FALSE 0
 
 //Taille max d'une chaîne de caractères
-#define S_MAX 20
-
-int main()
+#define S_MAX 256
+int interp_commande(char * commande)
+{
+	/*Interprète les commandes et exécute la fonction appropriée.
+	 * Renvoie 1 si la commande est différente de q, 0 sinon. 
+	 * La fonction découpe_mots servira à découper la commande dans les cas où il y a des arguments (par exemple : la commande p).*/
+	
+	char nom[S_MAX];
+	int enregistre = TRUE;
+	switch (commande[0]) 
+	{	
+		case 'e' :
+			// Si on veut enregistrer le nom d'utilisateur 
+			printf("Votre nom d'utilisateur est \n");
+			printf("Enregistrement en cours...\n");
+			enregistre = TRUE;
+			break;
+		case 'p' : 
+			if (enregistre==TRUE)
+				printf("Ouverture de la fenêtre de dialogue\n");
+			else 
+				printf("Vous n'êtes pas enregistré ! \n");
+			break;
+		case 'q' : 
+			printf("Au revoir.\n");
+			return 1;
+			break;
+		default : 
+			printf("Veuillez écrire une lettre entre e, p ou q\n");
+			break;
+	}
+	printf("\n===================================\n");
+	return 0;
+}
+int main(int argc, char **argv)
 {
 	int running = TRUE;
-	int enregistre = TRUE;
-	char arg[S_MAX] = "";
-	char nom[S_MAX] = "";
-
+	int cmd = -1; // Cette variable sert à stocker commande rentré l'indice vaut 0 si l'utilsateur rentre e, 1 si p, q si 2, 3 sinon) 
+	char buf[S_MAX];
 	while (running == TRUE)
 	{
 		// Boucle d'execution de notre programme
-		char c[S_MAX];
+		char *commande;
 		printf("Entrez une commande (e, p, q) \n");
-		scanf("%s %s", &c[0], &arg);
-		printf("%c_%s", c[0], arg);
-		fflush(stdin);
-		switch (c[0]) 
-		{	
-		case 'e' :
-				// Si on veut enregistrer le nom d'utilisateur 
-				printf("CATCH : %s \n", arg);
-				if (arg != "")
-				{
-					printf("Votre nom d'utilisateur est %s\n", arg);
-					printf("Enregistrement en cours...\n");
-					enregistre = TRUE;
-				}
-				else 
-					printf("Format incorrect, il faut mettre un nom d'utilisateur après le e");
-			break;
-		case 'p' : 
-		if (enregistre==TRUE)
-			printf("Ouverture de la fenêtre de dialogue\n");
-		else 
-			printf("Vous n'êtes pas enregistré ! \n");
-		break;
-		case 'q' : 
-		printf("Au revoir.\n");
-		running = FALSE;
-		break;
-		default : 
-		printf("Veuillez écrire une lettre entre e, p ou q\n");
-		break;
+		fgets(buf, S_MAX, stdin);
+		cmd = interp_commande(buf);
+		if (cmd == 1) 
+			running = FALSE	;
+
 	}
-	printf("\n===================================\n");
+	return EXIT_SUCCESS;
 }
-return EXIT_SUCCESS;
-}
+
