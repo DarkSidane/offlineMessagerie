@@ -75,6 +75,7 @@ int interp_commande(char *commande)
 	int enregistre = TRUE;
 	if (strlen(buf[0]) > 1) printf("Commande non recconu\n"); 
 	else {
+		printf("------------------------\n");
 		switch (buf[0][0])
 		{
 		case 'e':
@@ -111,7 +112,27 @@ int main(int argc, char **argv)
 	int buildStatus = system("gcc fenetre.c -o build/fenetre -lX11");
 
 	if (buildStatus == 0) {
-		printf("Build successful.\n");
+		printf(" .----------------.  .----------------.  .----------------.  .----------------. \n"
+"| .--------------. || .--------------. || .--------------. || .--------------. |\n"
+"| |     ______   | || |  ____  ____  | || |      __      | || |  _________   | |\n"
+"| |   .' ___  |  | || | |_   ||   _| | || |     /  \\     | || | |  _   _  |  | |\n"
+"| |  / .'   \\_|  | || |   | |__| |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |\n"
+"| |  | |         | || |   |  __  |   | || |   / ____ \\   | || |     | |      | |\n"
+"| |  \\ `.___.'\\  | || |  _| |  | |_  | || | _/ /    \\ \\_ | || |    _| |_     | |\n"
+"| |   `._____.'  | || | |____||____| | || ||____|  |____|| || |   |_____|    | |\n"
+"| |              | || |              | || |              | || |              | |\n"
+"| '--------------' || '--------------' || '--------------' || '--------------' |\n"
+" '----------------'  '----------------'  '----------------'  '----------------' \n"
+ 				"Bienvenue dans CHAT OFFLINE.\n" 
+				"=============================\n"
+				"Le nouveau système de CHAT en local, permettant de communiquer d'une fenêtre à une autre. \n"
+				"=============================\n"
+				"Entrer e <nom> pour vous enregistrer.\n"
+				"Entrer p pour afficher la fenêtre de Dialogue Utilisateur.\n"
+				"Entrer q pour quitter notre logiciel.\n"
+				"\n"
+				"---------------------------------------\n"
+				"\n");
 	} else {
 		printf("Build failed.\n");
 	}
