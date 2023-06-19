@@ -14,6 +14,7 @@ GC gc;
 XFontStruct *font;
 char messages[MAX_MESSAGES][MESSAGE_LENGTH];
 int messageCount = 0;
+char username[MESSAGE_LENGTH];
 
 void drawMessageHistory() {
 	XClearWindow(display, window);
@@ -23,18 +24,24 @@ void drawMessageHistory() {
 	int y = 60;
 	for (i = 0; i < messageCount; i++) {
 		char message[MESSAGE_LENGTH + 20];
+		char buf[MESSAGE_LENGTH + 20] = "";
 		time_t now = time(NULL);
 		struct tm *localTime = localtime(&now);
-		strftime(message, sizeof(message), "(Utilisateur : %H:%M)", localTime);
+		strftime(message, sizeof(message),  "(%H:%M) : ", localTime);
+		strcat(buf, username);
+		strcat(buf, message);
+		strcpy(message, buf);
 		strcat(message, messages[i]);
 		XDrawString(display, window, gc, 10, y, message, strlen(message));
 		y += 20;
 	}
 }
-
 void drawTextInputField(const char *input) {
 	XSetForeground(display, gc, BlackPixel(display, DefaultScreen(display)));
-	XDrawString(display, window, gc, 10, 40, "Utilisateur :", 12);
+	char buf[MESSAGE_LENGTH + 20] = "";
+	strcat(buf, username);
+	strcat(buf, " : ");
+	XDrawString(display, window, gc, 10, 40, buf, strlen(buf));
 	XDrawRectangle(display, window, gc, 120, 30, 250, 20);
 	XSetForeground(display, gc, WhitePixel(display, DefaultScreen(display)));
 	XFillRectangle(display, window, gc, 121, 31, 248, 18);
@@ -47,7 +54,8 @@ void drawSendButton() {
     XDrawRectangle(display, window, gc, 380, 30, 70, 20);
     XDrawString(display, window, gc, 385, 45, "Envoyer", 7);
 }
-int main() {
+int main(int argc, char* argv[]) {
+	strcpy(username, argv[1]);
 	display = XOpenDisplay(NULL);
 	if (display == NULL) {
 		fprintf(stderr, "Cannot open display\n");

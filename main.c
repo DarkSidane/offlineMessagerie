@@ -25,7 +25,7 @@ char **decoupe_mots(char *buf)
 	}
 	return com;
 }
-int parler(char *nom)
+int parler(char *nom1, char *nom2)
 {
 	// Create the first process
 	pid_t pid1 = fork();
@@ -38,7 +38,7 @@ int parler(char *nom)
 	else if (pid1 == 0)
 	{
 		// Child process 1
-		execlp("./build/fenetre", "fenetre", NULL);
+		execlp("./build/fenetre", "fenetre", nom1, NULL);
 		fprintf(stderr, "Failed to launch xterm for process 1\n");
 		return 1;
 	}
@@ -54,7 +54,7 @@ int parler(char *nom)
 	else if (pid2 == 0)
 	{
 		// Child process 2
-		execlp("./build/fenetre", "fenetre", NULL);
+		execlp("./build/fenetre", "fenetre", nom2, NULL);
 		fprintf(stderr, "Failed to launch xterm for process 2\n");
 		return 1;
 	}
@@ -90,7 +90,7 @@ int interp_commande(char *commande)
 		case 'p':
 			if (enregistre == TRUE) {
 				printf("Ouverture de la fenêtre de dialogue\n");
-				parler("TEST");
+				parler("TEST", "T");
 			}
 			else
 				printf("Vous n'êtes pas enregistré ! \n");
@@ -107,10 +107,9 @@ int interp_commande(char *commande)
 	}
 	return TRUE;
 }
-int main(int argc, char **argv)
+int main()
 {
 	int buildStatus = system("gcc fenetre.c -o build/fenetre -lX11");
-
 	if (buildStatus == 0) {
 		printf(" .----------------.  .----------------.  .----------------.  .----------------. \n"
 "| .--------------. || .--------------. || .--------------. || .--------------. |\n"
