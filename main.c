@@ -7,7 +7,10 @@
 #define TRUE 1
 #define FALSE 0
 #define S_MAX 256 // Taille max d'une chaîne de caractères
+#define NB_UTILISATEURS_MAX 10 // Nombre max d'utilisateurs
 
+char utilisateurs[NB_UTILISATEURS_MAX][S_MAX];
+int nb_utilisateurs;
 char **decoupe_mots(char *buf)
 {
 	// Prend un mot en argument et renvoie les mots contenus dedans
@@ -73,7 +76,7 @@ int interp_commande(char *commande)
 	char **buf = decoupe_mots(commande);
 	char nom[S_MAX];
 	int enregistre = TRUE;
-	if (strlen(buf[0]) > 1) printf("Commande non recconu\n"); 
+	if (strlen(buf[0]) > 1) printf("Commande non reconnue\n"); 
 	else {
 		printf("------------------------\n");
 		switch (buf[0][0])
@@ -81,16 +84,48 @@ int interp_commande(char *commande)
 		case 'e':
 			// Si on veut enregistrer le nom d'utilisateur
 			if (buf[1] == 0) printf("Vous devez renseigner un nom d'utilisateur");
-			else {
-				printf("Votre nom d'utilisateur est %s\n", buf[1]);
+			else 
+			{
 				printf("Enregistrement en cours...\n");
+				if (nb_utilisateurs == NB_UTILISATEURS_MAX) printf("Nombre d'utilisateurs maximum atteint !\n");
+				else
+				{
+					strcpy(utilisateurs[nb_utilisateurs], buf[1]);
+					nb_utilisateurs++;
+					printf("%s enregistré !\n", buf[1]);
+				}
 				enregistre = TRUE;
 			}
 			break;
 		case 'p':
-			if (enregistre == TRUE) {
+			if (enregistre == TRUE) 
+			{
+				printf("Quel compte voulez-vous utiliser ?\n");
+				for (int i = 0; i < nb_utilisateurs; i++)
+				{
+					printf("%d : %s\n",i, utilisateurs[i]);
+				}
+				int choix = -1;
+				scanf("%d", &choix);
+				while (choix < 0 || choix > nb_utilisateurs)
+				{
+					printf("Veillez entrer un nombre entre 0 et %d\n", nb_utilisateurs);
+					scanf("%d", &choix);
+				}	
+				printf("Avec quelles compte voulez-vous parler ?\n");
+				for (int i = 0; i < nb_utilisateurs; i++)
+				{
+					printf("%d : %s\n",i, utilisateurs[i]);
+				}
+				int choix2 = -1;
+				scanf("%d", &choix2);
+				while (choix2 < 0 || choix2 > nb_utilisateurs)
+				{
+					printf("Veillez entrer un nombre entre 0 et %d\n", nb_utilisateurs);
+					scanf("%d", &choix2);
+				}	
 				printf("Ouverture de la fenêtre de dialogue\n");
-				parler("TEST", "T");
+				parler(utilisateurs[choix], utilisateurs[choix2]);
 			}
 			else
 				printf("Vous n'êtes pas enregistré ! \n");
@@ -109,6 +144,7 @@ int interp_commande(char *commande)
 }
 int main()
 {
+	int nb_utilisateurs = 0;
 	int buildStatus = system("gcc fenetre.c -o build/fenetre -lX11");
 	if (buildStatus == 0) {
 		printf(" .----------------.  .----------------.  .----------------.  .----------------. \n"
