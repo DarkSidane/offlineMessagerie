@@ -98,7 +98,7 @@ int interp_commande(char *commande)
 			}
 			break;
 		case 'p':
-			if (enregistre == TRUE) 
+			if (nb_utilisateurs >= 2) 
 			{
 				printf("Quel compte voulez-vous utiliser ?\n");
 				for (int i = 0; i < nb_utilisateurs; i++)
@@ -128,7 +128,7 @@ int interp_commande(char *commande)
 				parler(utilisateurs[choix], utilisateurs[choix2]);
 			}
 			else
-				printf("Vous n'êtes pas enregistré ! \n");
+				printf("Il faut au moins deux utilisateurs pour parler\n");
 			break;
 		case 'q':
 			printf("Au revoir.\n");
