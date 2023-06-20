@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+
 // #include "fenetre.c"
 #define TRUE 1
 #define FALSE 0
@@ -33,6 +35,9 @@ int parler(char *nom1, char *nom2)
 	// Create the first process
 	pid_t pid1 = fork();
 
+	mkfifo("build/u1u2", 0666);
+    mkfifo("build/u2u1", 0666);
+
 	if (pid1 < 0)
 	{
 		fprintf(stderr, "Failed to create first process\n");
@@ -41,8 +46,12 @@ int parler(char *nom1, char *nom2)
 	else if (pid1 == 0)
 	{
 		// Child process 1
-		execlp("./build/fenetre", "fenetre", nom1, NULL);
+		// execlp("./build/fenetre", "fenetre", nom1, NULL);
 		// execlp("xterm", "xterm", "-e", "./build/dialogue", "u1u2", "u2u1", (char*) NULL);
+
+		char *const xterm_args[] = {"xterm", "-e", "./build/dialogue", "build/u1u2", "build/u2u1", nom1, NULL};
+		if (execvp("xterm", xterm_args) == -1) { perror("execvp"); exit(EXIT_FAILURE); }
+
 		fprintf(stderr, "Failed to launch xterm for process 1\n");
 		return 1;
 	}
@@ -58,8 +67,12 @@ int parler(char *nom1, char *nom2)
 	else if (pid2 == 0)
 	{
 		// Child process 2
-		execlp("./build/fenetre", "fenetre", nom2, NULL);
+		// execlp("./build/fenetre", "fenetre", nom2, NULL);
 		// execlp("xterm", "xterm", "-e", "./build/dialogue", "u2u1", "u1u2", (char*) NULL);
+
+		char *const xterm_args[] = {"xterm", "-e", "./build/dialogue", "build/u2u1", "build/u1u2", nom2, NULL};
+		if (execvp("xterm", xterm_args) == -1) { perror("execvp"); exit(EXIT_FAILURE); }
+
 		fprintf(stderr, "Failed to launch xterm for process 2\n");
 		return 1;
 	}
