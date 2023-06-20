@@ -4,14 +4,25 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #define TRUE 1
 #define FALSE 0
 #define S_MAX 256
 #define NB_UTILISATEURS_MAX 10
+#define SHM_KEY 9876
+#define MAX_UTILISATEURS 100
 
-char utilisateurs[NB_UTILISATEURS_MAX][S_MAX];
-int nb_utilisateurs;
+
+struct Utilisateur {
+    char nom[S_MAX];
+    int disponible;
+};
+
+struct Utilisateur *shm_utilisateurs = NULL;
+
+int nb_utilisateurs = 1;
 
 char **decoupe_mots(char *buf) {
 
@@ -66,45 +77,79 @@ int interp_commande(char *commande) {
 			} else if (strlen(buf[1]) >= S_MAX) {
 				printf("\033[0;31mNom d'utilisateur trop long\n");
 			} else {
-				// Copie sécurisée du nom d'utilisateur
-				strncpy(utilisateurs[nb_utilisateurs], buf[1], S_MAX);
-				utilisateurs[nb_utilisateurs][S_MAX - 1] = '\0';
-				nb_utilisateurs++;
-				printf("\033[1;32m%s \033[0;32menregistré !\n\033[0;36m", buf[1]);
+				int trouve = 0;
+				for (int i = 0; i < MAX_UTILISATEURS; i++) {
+					if (shm_utilisateurs[i].disponible != TRUE) {
+						strcpy(shm_utilisateurs[i].nom, buf[1]);
+						shm_utilisateurs[i].disponible = TRUE;
+						printf("\033[1;32m%s \033[0;32ms'est connecté(e) !\n\033[0;36m", buf[1]);
+						trouve = 1;
+						nb_utilisateurs++;
+						break;
+					}
+				}
+				if (!trouve) {
+					printf("\033[0;31mNombre maximum d'utilisateurs atteint\n");
+				}
 			}
 			break;
 
 		case 'p':
 			if (nb_utilisateurs >= 2) {
+				if (buf[1] == NULL || buf[2] == NULL) {
+					printf("\033[0;31mVous devez spécifier les noms d'utilisateurs pour parler\n");
+				} else {
+					int utilisateur1_present = 0;
+					int utilisateur2_present = 0;
+					int utilisateur1_index, utilisateur2_index;
 
-				printf("\nQuel compte voulez-vous utiliser ?\n");
-				for (int i = 0; i < nb_utilisateurs; i++) printf(" - %d : %s\n", i, utilisateurs[i]);
-				printf("\n> ");
-				scanf("%d", &choix);
-				while (choix < 0 || choix > nb_utilisateurs - 1) {
-					printf("\nVeillez entrer un nombre entre 0 et %d\n> ", nb_utilisateurs - 1);
-					int c;
-					while ((c = getchar()) != '\n' && c != EOF) { }
-					scanf("%d", &choix);
-					printf("\n");
+					for (int i = 0; i < nb_utilisateurs; i++) {
+						if (strcmp(shm_utilisateurs[i].nom, buf[1]) == 0) {
+							utilisateur1_present = 1;
+							utilisateur1_index = i;
+						}
+						if (strcmp(shm_utilisateurs[i].nom, buf[2]) == 0) {
+							utilisateur2_present = 1;
+							utilisateur2_index = i;
+						}
+					}
+
+					if (utilisateur1_present && utilisateur2_present) {
+						parler(buf[1], buf[2]);
+					} else {
+						printf("\033[0;31mLes utilisateurs spécifiés ne sont pas connectés\n");
+					}
 				}
-				printf("\nAvec quelles compte voulez-vous parler ?\n");
-				for (int i = 0; i < nb_utilisateurs; i++) printf(" - %d : %s\n", i, utilisateurs[i]);
-				printf("\n> ");
-				scanf("%d", &choix2);
-				while (choix2 < 0 || choix2 > nb_utilisateurs - 1) {
-					printf("\nVeillez entrer un nombre entre 0 et %d\n> ", nb_utilisateurs - 1);
-					int c;
-					while ((c = getchar()) != '\n' && c != EOF) { }
-					scanf("%d", &choix2);
-					printf("\n");
-				}
-				printf("Ouverture de la fenêtre de dialogue ...\n");
-				parler(utilisateurs[choix], utilisateurs[choix2]);
-				choix = -1;
-				choix2 = -1;
+			} else {
+				printf("\033[0;31mIl faut au moins deux utilisateurs pour parler\n");
 			}
-			else printf("\033[0;31mIl faut au moins deux utilisateurs pour parler\n");
+			break;
+		case 'l':
+			printf("Utilisateurs connectés :\n");
+			for (int i = 0; i < nb_utilisateurs; i++) {
+				if (shm_utilisateurs[i].disponible) {
+					printf(" - %s\n", shm_utilisateurs[i].nom);
+				}
+			}
+			break;
+
+		case 'd':
+			if (buf[1] == NULL) {
+				printf("\033[0;31mVous devez renseigner votre nom d'utilisateur\n");
+			} else {
+				int trouve = 0;
+				for (int i = 0; i < nb_utilisateurs; i++) {
+					if (strcmp(shm_utilisateurs[i].nom, buf[1]) == 0) {
+						shm_utilisateurs[i].disponible = FALSE;
+						trouve = 1;
+						printf("\033[1;32m%s \033[0;32ms'est déconnecté(e) !\n\033[0;36m", buf[1]);
+						break;
+					}
+				}
+				if (!trouve) {
+					printf("\033[0;31mUtilisateur non trouvé\n");
+				}
+			}
 			break;
 
 		case 'q':
@@ -153,6 +198,18 @@ int main() {
 	mkfifo("build/u1u2", 0666);
 	mkfifo("build/u2u1", 0666);
 
+	int shm_id = shmget(SHM_KEY, MAX_UTILISATEURS * sizeof(struct Utilisateur), IPC_CREAT | 0666);
+	if (shm_id == -1) {
+		perror("Erreur lors de la création du segment de mémoire partagée");
+		exit(EXIT_FAILURE);
+	}
+
+	shm_utilisateurs = shmat(shm_id, NULL, 0);
+	if (shm_utilisateurs == (void *)-1) {
+		perror("Erreur lors de l'attachement au segment de mémoire partagée");
+		exit(EXIT_FAILURE);
+	}
+
 	printMenu();
 
 	int running = TRUE;
@@ -169,6 +226,16 @@ int main() {
 		else running = interp_commande(buf);
 		if(running == TRUE) printf("\033[0;36m\n> ");
 	}
+
+	if (shmdt(shm_utilisateurs) == -1) {
+		perror("Erreur lors du détachement du segment de mémoire partagée");
+		exit(EXIT_FAILURE);
+	}
+	if (shmctl(shm_id, IPC_RMID, NULL) == -1) {
+		perror("Erreur lors de la suppression du segment de mémoire partagée");
+		exit(EXIT_FAILURE);
+	}
+
 	sleep(1);
 	return EXIT_SUCCESS;
 }
