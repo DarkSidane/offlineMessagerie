@@ -104,11 +104,11 @@ int interp_commande(char *commande) {
 					int utilisateur1_index, utilisateur2_index;
 
 					for (int i = 0; i < nb_utilisateurs; i++) {
-						if (strcmp(shm_utilisateurs[i].nom, buf[1]) == 0) {
+						if (strcmp(shm_utilisateurs[i].nom, buf[1]) == 0 && shm_utilisateurs[i].disponible == TRUE) {
 							utilisateur1_present = 1;
 							utilisateur1_index = i;
 						}
-						if (strcmp(shm_utilisateurs[i].nom, buf[2]) == 0) {
+						if (strcmp(shm_utilisateurs[i].nom, buf[2]) == 0 && shm_utilisateurs[i].disponible == TRUE) {
 							utilisateur2_present = 1;
 							utilisateur2_index = i;
 						}
