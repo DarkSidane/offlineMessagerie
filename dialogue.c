@@ -79,22 +79,24 @@ void *pipe_writer(void *arg)
     }
 
     char buffer[BUFFER_SIZE];
-    while (1) {
+    while (1) 
+    {
 
-        while (fgets(buffer, BUFFER_SIZE, stdin) != NULL)  {
-            buffer[strcspn(buffer, "\n")] = 0;
-            break;
-        }
-        fflush(stdin);
+	    while (fgets(buffer, BUFFER_SIZE, stdin) != NULL)  
+	    {
+		    buffer[strcspn(buffer, "\n")] = 0;
+		    break;
+	    }
+	    fflush(stdin);
 
-        if(strcmp(buffer, "/quitter") == 0) {
-            printf("Vous avez quitté la conversation\n");
-            write(output_pipe, buffer, strlen(buffer));
-            sleep(1);
-            exit(EXIT_SUCCESS);
-        }
+	    if(strcmp(buffer, "/quitter") == 0) {
+		    printf("Vous avez quitté la conversation\n");
+		    write(output_pipe, buffer, strlen(buffer));
+		    sleep(1);
+		    exit(EXIT_SUCCESS);
+	    }
 
-        write(output_pipe, buffer, strlen(buffer));
+	    write(output_pipe, buffer, strlen(buffer));
     }
 
     pthread_exit(NULL);
