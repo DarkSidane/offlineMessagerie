@@ -21,7 +21,7 @@ struct Utilisateur {
 };
 
 struct Utilisateur *shm_utilisateurs = NULL;
-
+int current_user = -1;
 int nb_utilisateurs = 1;
 
 char **decoupe_mots(char *buf) {
@@ -39,12 +39,12 @@ char **decoupe_mots(char *buf) {
 	}
 	return com;
 }
-void parler(char *nom1, char *nom2) {
+void parler(char *nom) {
 
 	pid_t pid1 = fork();
 	if (pid1 < 0) { fprintf(stderr, "Failed to create first process\n"); exit(EXIT_FAILURE); }
 	else if (pid1 == 0) {
-		char *const xterm_args[] = {"xterm", "-e", "./build/dialogue", "build/u1u2", "build/u2u1", nom1, nom2, NULL};
+		char *const xterm_args[] = {"xterm", "-e", "./build/dialogue", "build/u1u2", "build/u2u1", shm_utilisateurs[current_user].nom, nom, NULL};
 		if (execvp("xterm", xterm_args) == -1) { perror("execvp"); exit(EXIT_FAILURE); }
 		fprintf(stderr, "Failed to launch xterm for process 1\n");
 	}
@@ -52,7 +52,7 @@ void parler(char *nom1, char *nom2) {
 	pid_t pid2 = fork();
 	if (pid2 < 0) { fprintf(stderr, "Failed to create second process\n"); exit(EXIT_FAILURE); }
 	else if (pid2 == 0) {
-		char *const xterm_args[] = {"xterm", "-e", "./build/dialogue", "build/u2u1", "build/u1u2", nom2, nom1, NULL};
+		char *const xterm_args[] = {"xterm", "-e", "./build/dialogue", "build/u2u1", "build/u1u2", nom, shm_utilisateurs[current_user].nom, NULL};
 		if (execvp("xterm", xterm_args) == -1) { perror("execvp"); exit(EXIT_FAILURE); }
 		fprintf(stderr, "Failed to launch xterm for process 2\n");
 	}
@@ -77,45 +77,49 @@ int interp_commande(char *commande) {
 			} else if (strlen(buf[1]) >= S_MAX) {
 				printf("\033[0;31mNom d'utilisateur trop long\n");
 			} else {
-				int trouve = 0;
-				for (int i = 0; i < MAX_UTILISATEURS; i++) {
-					if (shm_utilisateurs[i].disponible != TRUE) {
-						strcpy(shm_utilisateurs[i].nom, buf[1]);
-						shm_utilisateurs[i].disponible = TRUE;
-						printf("\033[1;32m%s \033[0;32ms'est connecté(e) !\n\033[0;36m", buf[1]);
-						trouve = 1;
-						nb_utilisateurs++;
-						break;
+				if(current_user == -1) {
+					int trouve = 0;
+					for (int i = 0; i < MAX_UTILISATEURS; i++) {
+						if (shm_utilisateurs[i].disponible != TRUE) {
+							strcpy(shm_utilisateurs[i].nom, buf[1]);
+							shm_utilisateurs[i].disponible = TRUE;
+							printf("\033[1;32m%s \033[0;32ms'est connecté(e) !\n\033[0;36m", buf[1]);
+							trouve = 1;
+							current_user = i;
+							nb_utilisateurs++;
+							break;
+						}
 					}
-				}
-				if (!trouve) {
-					printf("\033[0;31mNombre maximum d'utilisateurs atteint\n");
+					if (!trouve) {
+						printf("\033[0;31mNombre maximum d'utilisateurs atteint\n");
+					}
+				} else {
+					printf("\033[0;31mVous êtes déjà connecté\n");
 				}
 			}
 			break;
 
 		case 'p':
-			if (nb_utilisateurs >= 2) {
-				if (buf[1] == NULL || buf[2] == NULL) {
+			if(current_user == -1) {
+				printf("\033[0;31mVous devez vous connecter avant de parler\n");
+				break;
+			}
+			if (nb_utilisateurs > 1) {
+				if (buf[1] == NULL) {
 					printf("\033[0;31mVous devez spécifier les noms d'utilisateurs pour parler\n");
 				} else {
-					int utilisateur1_present = 0;
-					int utilisateur2_present = 0;
-					int utilisateur1_index, utilisateur2_index;
+					int utilisateur_present = 0;
+					int utilisateur_index;
 
 					for (int i = 0; i < nb_utilisateurs; i++) {
 						if (strcmp(shm_utilisateurs[i].nom, buf[1]) == 0 && shm_utilisateurs[i].disponible == TRUE) {
-							utilisateur1_present = 1;
-							utilisateur1_index = i;
-						}
-						if (strcmp(shm_utilisateurs[i].nom, buf[2]) == 0 && shm_utilisateurs[i].disponible == TRUE) {
-							utilisateur2_present = 1;
-							utilisateur2_index = i;
+							utilisateur_present = 1;
+							utilisateur_index = i;
 						}
 					}
 
-					if (utilisateur1_present && utilisateur2_present) {
-						parler(buf[1], buf[2]);
+					if (utilisateur_present) {
+						parler(buf[1]);
 					} else {
 						printf("\033[0;31mLes utilisateurs spécifiés ne sont pas connectés\n");
 					}
@@ -134,26 +138,21 @@ int interp_commande(char *commande) {
 			break;
 
 		case 'd':
-			if (buf[1] == NULL) {
-				printf("\033[0;31mVous devez renseigner votre nom d'utilisateur\n");
+			if (current_user == -1) {
+				printf("\033[0;31mVous devez vous connecter avant de vous déconnecter\n");
 			} else {
-				int trouve = 0;
-				for (int i = 0; i < nb_utilisateurs; i++) {
-					if (strcmp(shm_utilisateurs[i].nom, buf[1]) == 0) {
-						shm_utilisateurs[i].disponible = FALSE;
-						trouve = 1;
-						printf("\033[1;32m%s \033[0;32ms'est déconnecté(e) !\n\033[0;36m", buf[1]);
-						break;
-					}
-				}
-				if (!trouve) {
-					printf("\033[0;31mUtilisateur non trouvé\n");
-				}
+				shm_utilisateurs[current_user].disponible = FALSE;
+				printf("\033[1;32m%s \033[0;32ms'est déconnecté(e) !\n\033[0;36m", shm_utilisateurs[current_user].nom);
+				current_user = -1;
 			}
 			break;
 
 		case 'q':
 			printf("\033[1;36mAu revoir.\n\n");
+			if (current_user != -1) {
+				shm_utilisateurs[current_user].disponible = FALSE;
+				current_user = -1;
+			}
 			R = FALSE;
 			break;
 
@@ -188,8 +187,8 @@ void printMenu() {
 		   "Liste des commandes\033[0;36m\n"
 		   " -\033[1;36m e <nom>\033[0;36m : s'enregister avec le nom <nom>.\n"
 		   " -\033[1;36m p <nom>\033[0;36m : ouvrir un dialogue avec l'utilisateur nomme <nom>.\n"
-		   " -\033[1;36m l	\033[0;36m : affichage de la liste des utilisateur.\n"
-		   " -\033[1;36m d 	\033[0;36m : déconnecte l'utilisateur local.\n"
+		   " -\033[1;36m l	  \033[0;36m : affichage de la liste des utilisateur.\n"
+		   " -\033[1;36m d      \033[0;36m : déconnecte l'utilisateur local.\n"
 		   " -\033[1;36m q      \033[0;36m : quitter le chat.\n");
 	printf("\033[0m");
 	printf("\033[0;36m\n\n> ");
