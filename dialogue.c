@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define BUFFER_SIZE 256 
 #define ARG_SIZE 256
@@ -54,13 +55,24 @@ void *pipe_reader(void *arg)
     char buffer[BUFFER_SIZE];
     while (1)
     {
+        memset(buffer, 0, sizeof(buffer));
         read(input_pipe, buffer, BUFFER_SIZE);
         if(strcmp(buffer, "/quitter") == 0) {
             printf("L'interlocuteur a quitté la conversation\n");
             sleep(1);
             exit(EXIT_SUCCESS);
         }
-        printf("Message reçu de %s : %s\n", (char *)array[3], buffer);
+        char messageComplet[BUFFER_SIZE+20] = "";
+        char heure[BUFFER_SIZE+20] = "";
+        time_t now = time(NULL);
+        struct tm *lt = localtime(&now);
+        strftime(heure, sizeof(heure), "(%H:%M) : ", lt);
+        strcpy(messageComplet, (char *)array[3]);
+        strcat(messageComplet, " ");
+        strcat(messageComplet, heure);
+        strcat(messageComplet, buffer);
+
+        printf("\n%s\n", messageComplet);
     }
 
     pthread_exit(NULL);
@@ -77,6 +89,12 @@ void *pipe_writer(void *arg)
         perror("Erreur lors de l'ouverture des FIFO");
         pthread_exit(NULL);
     }
+
+    char heure[BUFFER_SIZE+20] = "";
+    time_t now = time(NULL);
+    struct tm *lt = localtime(&now);
+    strftime(heure, sizeof(heure), "(%H:%M) : ", lt);
+    printf("%s %s", (char *)array[0], heure);
 
     char buffer[BUFFER_SIZE];
     while (1) 
@@ -97,6 +115,7 @@ void *pipe_writer(void *arg)
 	    }
 
 	    write(output_pipe, buffer, strlen(buffer));
+        printf("%s %s", (char *)array[0], heure);
     }
 
     pthread_exit(NULL);
