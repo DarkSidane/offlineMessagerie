@@ -188,6 +188,8 @@ void printMenu() {
 		   "Liste des commandes\033[0;36m\n"
 		   " -\033[1;36m e <nom>\033[0;36m : s'enregister avec le nom <nom>.\n"
 		   " -\033[1;36m p <nom>\033[0;36m : ouvrir un dialogue avec l'utilisateur nomme <nom>.\n"
+		   " -\033[1;36m l	\033[0;36m : affichage de la liste des utilisateur.\n"
+		   " -\033[1;36m d 	\033[0;36m : déconnecte l'utilisateur local.\n"
 		   " -\033[1;36m q      \033[0;36m : quitter le chat.\n");
 	printf("\033[0m");
 	printf("\033[0;36m\n\n> ");
